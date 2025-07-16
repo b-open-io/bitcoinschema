@@ -1,25 +1,14 @@
 import { DocsLayout } from 'fumadocs-ui/layouts/docs';
 import type { ReactNode } from 'react';
 import { source } from '@/lib/source';
-import Image from 'next/image';
+import { BitcoinLogo } from '@/components/bitcoin-logo';
 
 export default function Layout({ children }: { children: ReactNode }) {
   return (
     <DocsLayout
       tree={source.pageTree}
       nav={{
-        title: (
-          <div className="flex items-center space-x-2">
-            <Image
-              src="/bitcoin-schema-logo.svg"
-              alt="Bitcoin Schema Logo"
-              width={32}
-              height={32}
-              className="h-8 w-8"
-            />
-            <span>Bitcoin Schema</span>
-          </div>
-        ),
+        title: <BitcoinLogo className="h-8 w-8" />,
         url: '/',
       }}
       sidebar={{
