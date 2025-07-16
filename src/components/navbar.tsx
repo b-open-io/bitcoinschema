@@ -1,6 +1,6 @@
 import Link from 'next/link';
-import Image from 'next/image';
 import { ModeToggle } from '@/components/mode-toggle';
+import { BitcoinLogo } from '@/components/bitcoin-logo';
 import { Montserrat } from 'next/font/google';
 
 const montserrat = Montserrat({ 
@@ -15,13 +15,7 @@ export function Navbar() {
         <div className="flex h-16 items-center justify-between">
           {/* Logo */}
           <Link href="/" className="flex items-center space-x-3">
-            <Image
-              src="/bitcoin-schema-logo-icon.svg"
-              alt="Bitcoin Schema"
-              width={32}
-              height={32}
-              className="h-8 w-8 flex-shrink-0"
-            />
+            <BitcoinLogo className="h-8 w-8 flex-shrink-0" />
             <span className={`${montserrat.className} text-xl font-semibold text-foreground leading-none`}>
               Bitcoin Schema
             </span>
