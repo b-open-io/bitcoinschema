@@ -5,7 +5,7 @@ interface BitcoinLogoProps {
 export function BitcoinLogo({ className = "h-8 w-8" }: BitcoinLogoProps) {
   return (
     <svg
-      viewBox="0 0 200 280"
+      viewBox="20 20 140 240"
       className={className}
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
