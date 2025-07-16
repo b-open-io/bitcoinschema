@@ -21,7 +21,8 @@
     "fumadocs-ui": "^15.6.4",
     "next": "15.4.1",
     "react": "19.1.0",
-    "react-dom": "19.1.0"
+    "react-dom": "19.1.0",
+    "zod": "^4.0.5"
   },
   "devDependencies": {
     "typescript": "^5.8.3",

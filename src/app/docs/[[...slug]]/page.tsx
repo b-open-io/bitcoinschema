@@ -8,20 +8,25 @@ import {
 import { notFound } from 'next/navigation';
 import defaultMdxComponents from 'fumadocs-ui/mdx';
 
-export default async function Page(props: {
-  params: Promise<{ slug?: string[] }>;
-}) {
+interface PageProps {
+  params: Promise<{ slug?: string[] }>; // Next.js 15 async params!
+}
+
+export default async function Page(props: PageProps) {
   const params = await props.params;
-  const page = source.getPage(params.slug);
+  const page = source.getPage(params.slug || []);
+  
   if (!page) notFound();
 
-  // @ts-ignore - Need to fix type definitions
-  const MDX = page.data.body;
+  // SYNC MODE - direct access to body and toc
+  const MDX = (page.data as any).body;
 
   return (
-    <DocsPage toc={page.data.toc} full={page.data.full}>
+    <DocsPage toc={(page.data as any).toc}>
       <DocsTitle>{page.data.title}</DocsTitle>
-      <DocsDescription>{page.data.description}</DocsDescription>
+      {page.data.description && (
+        <DocsDescription>{page.data.description}</DocsDescription>
+      )}
       <DocsBody>
         <MDX components={defaultMdxComponents} />
       </DocsBody>
@@ -33,12 +38,12 @@ export async function generateStaticParams() {
   return source.generateParams();
 }
 
-export async function generateMetadata(props: {
-  params: Promise<{ slug?: string[] }>;
-}) {
+// Generate metadata
+export async function generateMetadata(props: PageProps) {
   const params = await props.params;
-  const page = source.getPage(params.slug);
-  if (!page) notFound();
+  const page = source.getPage(params.slug || []);
+  
+  if (!page) return {};
 
   return {
     title: page.data.title,
