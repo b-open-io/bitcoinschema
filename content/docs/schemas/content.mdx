@@ -1,0 +1,111 @@
+---
+title: Content Publishing
+description: Schemas for posts, replies, and content sharing
+---
+
+# Content Publishing
+
+Schemas for creating, sharing, and responding to content on the Bitcoin blockchain.
+
+## Post
+
+Post is meant to express a new piece of content to the network.
+
+### Key Features
+
+- **B Protocol Content**: Posts can contain anything from plain text, images, markdown, or binary data
+- **Flexible Attachments**: Additional content can be attached (see [Messaging section](/docs/schemas/messaging) for details)
+- **Context Support**: Optional context and subcontext properties for categorization and threading
+
+### OP_RETURN Format
+
+```
+B <content> <mediaType> <encoding> | MAP SET app <appname> type post | AIP BITCOIN_ECDSA <address> <signature>
+```
+
+### Optional Parameters
+
+- Context
+- ContextValue
+- Subcontext
+- Subcontext Value
+
+### Use Cases
+
+The Context and Subcontext properties allow flexible content organization:
+
+- **Geolocation**: Post within specific geographic contexts
+- **Platform Integration**: Comment on YouTube videos using context "provider" = "youtube" and subcontext "videoID" = video ID
+- **Product Reviews**: Comment on products using UPC codes as context
+
+### go-bitcoin-schema
+
+```go
+// Basic post
+post := bschema.Post{
+  MediaType:        MediaTypeTextMarkdown,
+  Encoding:         EncodingUTF8,
+  Content:          "# Hello small world!",
+}
+tx, err := bschema.CreatePost(post, utxos, changeAddress, privateKey)
+
+// Post with context (e.g., YouTube video comment)
+post := bschema.Post{
+  MediaType:        MediaTypeTextMarkdown,
+  Encoding:         EncodingUTF8,
+  Content:          "# Great video!",
+  Context:          ContextProvider,
+  ContextValue:     "youtube",
+  Subcontext:       ContextVideoID,
+  SubcontextValue:  "IdNs8eVGbBs",
+}
+tx, err := bschema.CreatePost(post, utxos, changeAddress, privateKey)
+```
+
+## Reply
+
+Replies are Posts with a context of a transaction ID, creating threaded conversations.
+
+### OP_RETURN Format
+
+```
+B <content> <mediaType> <encoding> | MAP SET app <appname> type post context tx tx <txid> | AIP BITCOIN_ECDSA <address> <signature>
+```
+
+### go-bitcoin-schema
+
+```go
+reply := bschema.Post{
+  MediaType:        MediaTypeTextMarkdown,
+  Encoding:         EncodingUTF8,
+  Content:          "# This is a markdown reply!",
+}
+tx, err := CreateReply(reply, replyTxID, utxos, changeAddress, privateKey)
+```
+
+## Repost
+
+A repost amplifies existing content without duplicating it. Reposts can be made with new context and subcontext, allowing content to surface in multiple contexts.
+
+### Use Case Example
+
+Imagine a post commenting on a physical product (UPC code context). Someone might repost that comment with a "url" context pointing to the company website, surfacing the comment in web-based apps like MetaLens.
+
+### Optional Parameters
+
+- Context
+- ContextValue
+- Subcontext
+- Subcontext Value
+
+### OP_RETURN Format
+
+```
+MAP SET app <appname> type repost tx <txid> | AIP BITCOIN_ECDSA <address> <signature>
+```
+
+### go-bitcoin-schema
+
+```go
+tx, err := CreateRepost(repostTxID, utxos, changeAddress, privateKey)
+```

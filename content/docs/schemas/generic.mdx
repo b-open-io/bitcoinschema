@@ -1,0 +1,102 @@
+---
+title: Generic Schemas
+description: General-purpose schemas for common use cases
+---
+
+# Generic Schemas
+
+General-purpose schemas that can be used across many different types of applications.
+
+## Payment
+
+Payment is used to describe a payment sent from one identity to another. It is commonly used by [BPP](https://github.com/icellan/bpp) when creating Content Paywalls and subscription services.
+
+### OP_RETURN Format
+
+```
+MAP SET app <appname> type payment context tx tx <txId>
+```
+
+### Optional Parameters
+
+- **Context**: The context of the payment (e.g., "subscription", "content", "tip")
+- **ContextValue**: The value associated with the context
+- **Subcontext**: Additional context layer (e.g., "plan_type", "content_id")
+- **Subcontext Value**: Value for the subcontext
+
+### Use Cases
+
+**Content Paywalls**
+- Track payments for premium content access
+- Link payments to specific articles, videos, or downloads
+- Support tiered access levels
+
+**Subscription Payments**
+- Monthly/yearly subscription tracking
+- Plan upgrades and downgrades
+- Trial period management
+
+**Tip Payments**
+- Social media tipping
+- Content creator support
+- Micro-donations
+
+**Service Payments**
+- API usage fees
+- Processing service costs
+- Platform fees
+
+### Implementation Examples
+
+**Basic Payment:**
+```
+MAP SET app myapp type payment context tx tx abc123...
+```
+
+**Subscription Payment:**
+```
+MAP SET app myapp type payment context subscription subcontext plan_type subcontextValue premium context tx tx abc123...
+```
+
+**Content Purchase:**
+```
+MAP SET app myapp type payment context content subcontext article_id subcontextValue art_456 context tx tx abc123...
+```
+
+## Future Schemas
+
+Additional generic schemas are planned based on community needs:
+
+### Image
+For image metadata and references, including:
+- Image dimensions and format
+- Alt text and descriptions
+- Location and timestamp data
+- Copyright and licensing info
+
+### Handle
+For user handle registration and management:
+- Unique username claiming
+- Handle transfers and updates
+- Cross-platform handle verification
+
+### Profile
+For comprehensive user profile information:
+- Display names and bio
+- Avatar and banner images
+- Social links and contact info
+- Verification badges
+
+## Contributing New Generic Schemas
+
+If you have ideas for new generic schemas:
+
+1. [Open an issue](https://github.com/b-open-io/bitcoinschema/issues/new) to discuss your proposal
+2. Join our [Discord community](https://discord.gg/vqj6wpKeEn) for discussions
+3. Submit a pull request with your schema definition
+
+Consider these questions when proposing new schemas:
+- Is this use case common across multiple applications?
+- Does it provide clear value over existing schemas?
+- Is the format flexible enough for different implementations?
+- Are there existing standards we should follow?

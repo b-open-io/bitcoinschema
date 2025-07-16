@@ -1,0 +1,89 @@
+---
+title: Advanced Functions
+description: On-chain function registration and execution
+---
+
+# Advanced Functions
+
+Advanced schemas for registering and executing on-chain functions, enabling complex application interactions.
+
+## Function
+
+The `function` type registers the intent to service function calls. Applications can register functions that will be executed when properly formatted calls are detected on-chain.
+
+### Key Components
+
+- **Function Name**: Unique identifier for the function
+- **Arguments Schema**: [AJV schema](https://ajv.js.org/) defining accepted arguments and types
+- **Price**: Cost in satoshis to execute the function
+- **BAP Signing**: Functions must be signed with BAP identity for uniqueness
+
+### OP_RETURN Format
+
+```
+MAP SET app <appname> type function name <functionName> argsType <objectTypeLiteral> price <satoshiPrice> | AIP BITCOIN_ECDSA address <signature>
+```
+
+### Function Updates
+
+When looking up functions, indexers should deliver the most recent function record that matches the function name and bapID. This allows developers to update their functions over time.
+
+### Example: Mention Bot Function
+
+A bot that responds to mentions might define a function accepting a message parameter:
+
+**Arguments Schema:**
+```js
+{
+  message: "string",
+  mentions: ["string"],
+  context: "string"
+}
+```
+
+**Function Registration:**
+```
+MAP SET app mybot type function name respondToMention argsType {"message":"string","mentions":["string"],"context":"string"} price 1000 | AIP BITCOIN_ECDSA <address> <signature>
+```
+
+## Function Call
+
+Calls are used to execute functions registered on the blockchain. Since function names are not unique, calls target functions using the registering application's bapID.
+
+### Key Components
+
+- **Function Name**: The function to execute
+- **Arguments**: JSON object with function parameters
+- **Target bapID**: Identity of the function provider
+- **Payment**: Transaction must include payment matching the function's price
+
+### OP_RETURN Format
+
+```
+MAP SET app <appname> type function name <functionName> args <args> context bapID bapID <bapID> | AIP BITCOIN_ECDSA address <signature>
+```
+
+### Example: Calling the Mention Bot
+
+To call the mention bot function from above:
+
+```
+MAP SET app mychat type function name respondToMention args {"message":"Hello @bot, help me!","mentions":["bot"],"context":"general"} context bapID bapID <bot-bap-id> | AIP BITCOIN_ECDSA <address> <signature>
+```
+
+### Execution Flow
+
+1. **Function Discovery**: Applications monitor for function registrations
+2. **Call Detection**: Monitor for function calls targeting their bapID
+3. **Validation**: Verify arguments match the function schema
+4. **Payment**: Ensure proper payment is included
+5. **Execution**: Execute the function and optionally respond on-chain
+
+### Use Cases
+
+- **AI Services**: Register AI models that respond to prompts
+- **Data Processing**: Offer data transformation services
+- **API Integration**: Bridge blockchain data with external APIs
+- **Automated Trading**: Execute trading strategies based on market data
+- **Content Moderation**: Provide automated content filtering
+- **Oracle Services**: Deliver external data on-chain

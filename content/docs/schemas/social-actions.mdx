@@ -1,0 +1,100 @@
+---
+title: Social Actions
+description: Basic social interactions - likes, follows, and relationships
+---
+
+# Social Actions
+
+Core social interactions that form the foundation of social networking applications.
+
+## Like
+
+Used to express positive sentiment about a post, transaction, or any other global identifier.
+
+### OP_RETURN Format
+
+```
+MAP SET app <appname> type like tx <txid> | AIP BITCOIN_ECDSA <address> <signature>
+```
+
+### go-bitcoin-schema
+
+```go
+tx, err := CreateLike(likeTxID, utxos, changeAddress, privateKey)
+```
+
+## Unlike
+
+Used to undo a like.
+
+### OP_RETURN Format
+
+```
+MAP SET app <appname> type unlike tx <txid> | AIP BITCOIN_ECDSA <address> <signature>
+```
+
+### go-bitcoin-schema
+
+```go
+tx, err := CreateUnlike(unlikeTxID, utxos, changeAddress, privateKey)
+```
+
+## Follow
+
+Used to express a one-way relationship between two identities.
+
+### OP_RETURN Format
+
+```
+MAP SET app <appname> type follow bapID <bapID> | AIP BITCOIN_ECDSA <address> <signature>
+```
+
+### go-bitcoin-schema
+
+```go
+tx, err := CreateFollow(followIdKey, utxos, changeAddress, privateKey)
+```
+
+## Unfollow
+
+Used to express the removal of a relationship between two identities.
+
+### OP_RETURN Format
+
+```
+MAP SET app <appname> type unfollow bapID <pubkey> | AIP BITCOIN_ECDSA <address> <signature>
+```
+
+### go-bitcoin-schema
+
+```go
+tx, err := CreateUnfollow(unfollowIdKey, utxos, changeAddress, privateKey)
+```
+
+## Friend
+
+Used to express a two-way relationship between two identities and allow for secured communications. Generate the publicKey for future communications based on a SHA256 hash of the other user's bapID.
+
+### Generate Public Key
+
+```js
+const seedHex = bsv.crypto.Hash.sha256(Buffer.from(friendIdKey)).toString("hex");
+const signingPath = getSigningPathFromHex(
+  Buffer.from(seedHex, "utf8").toString("hex")
+);
+const hdPrivateFriendKey = bsv.HDPrivateKey.deriveChild(signingPath);
+
+const publicFriendKey = hdPrivateFriendKey.privateKey.publicKey;
+```
+
+### OP_RETURN Format
+
+```
+MAP SET app <appname> type friend bapID <bapID> publicKey <publicFriendKey> | AIP BITCOIN_ECDSA <address> <signature>
+```
+
+### go-bitcoin-schema
+
+```go
+tx, err := CreateFollow(followIdKey, utxos, changeAddress, privateKey)
+```

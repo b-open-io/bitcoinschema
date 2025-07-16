@@ -1,0 +1,134 @@
+---
+title: Messaging & Communication
+description: Real-time messaging, tags, and attachments
+---
+
+# Messaging & Communication
+
+Schemas for real-time communication, content organization, and media attachments.
+
+## Message
+
+Message is similar to post, but uses a separate namespace intended for real-time chat content.
+
+### Key Features
+
+- **B Protocol Content**: Messages can contain text, images, markdown, or binary data
+- **Flexible Targeting**: Support for global chat, specific channels, or private messaging
+- **Context Support**: Optional context and subcontext properties
+
+### OP_RETURN Formats
+
+**Global chat:**
+```
+B <content> <mediaType> <encoding> | MAP SET app <appname> type message | AIP BITCOIN_ECDSA <address> <signature>
+```
+
+**Specific channel:**
+```
+B <content> <mediaType> <encoding> | MAP SET app <appname> type message context channel channel my-chatroom | AIP BITCOIN_ECDSA <address> <signature>
+```
+
+**Private message to specific user:**
+```
+B <content> <mediaType> <encoding> | MAP SET app <appname> type message context bapID bapID <recipient-bap-ID> | AIP BITCOIN_ECDSA <address> <signature>
+```
+
+### Optional Parameters
+
+- Context
+- ContextValue
+- Subcontext
+- Subcontext Value
+
+### go-bitcoin-schema
+
+```go
+// Channel message
+message := bschema.Message{
+  MediaType:        MediaTypeTextPlain,
+  Encoding:         EncodingUTF8,
+  Content:          "Hello everyone in #my-channel!",
+  Context:          ContextChannel,
+  ContextValue:     "my-channel",
+}
+tx, err := bschema.CreateMessage(message, utxos, changeAddress, privateKey)
+```
+
+## Tags
+
+Tags allow you to categorize content for improved search and filtering. Unlike context (which determines rendering and view), tags are general-purpose metadata for organization.
+
+### OP_RETURN Format
+
+Tags are added as an additional output:
+
+```
+MAP ADD tags <tag1> <tag2> <tag3> ... | AIP BITCOIN_ECDSA <address> <signature>
+```
+
+### go-bitcoin-schema
+
+You can include tags on any post or message:
+
+```go
+postContent := "# This is a tagged post"
+tags := []string{"technology", "bitcoin", "social"}
+
+post := Post{
+  MediaType:  MediaTypeTextMarkdown,
+  Encoding:   EncodingUTF8,
+  Content:    postContent,
+  Tags:       tags,
+}
+```
+
+## Attachments
+
+Attachments are included as additional OP_RETURN outputs using B protocol, allowing rich media content alongside posts and messages.
+
+### OP_RETURN Format
+
+Each attachment is a separate output:
+
+**Attachment 1:**
+```
+B <attachment1Data> <mediaType> <encoding> | BITCOIN_ECDSA <address> <signature>
+```
+
+**Attachment 2:**
+```
+B <attachment2Data> <mediaType> <encoding> | BITCOIN_ECDSA <address> <signature>
+```
+
+### go-bitcoin-schema Example
+
+```go
+htmlAttachment := "<html><h1>This is an HTML attachment</h1></html>"
+cssAttachment := "body { background-color: green; }"
+postContent := "# This is a post with attachments!"
+
+post := Post{
+  MediaType:  MediaTypeTextMarkdown,
+  Encoding:   EncodingUTF8,
+  Content:    postContent,
+  Tags:       []string{"example", "attachments"},
+  Attachments: []b.B{{
+    MediaType:  string(MediaTypeTextHTML),
+    Encoding:   string(EncodingUTF8),
+    Data:       b.Data{UTF8: htmlAttachment},
+  },{
+    MediaType: string(MediaTypeTextCSS),
+    Encoding: string(EncodingUTF8),
+    Data: b.Data{UTF8: cssAttachment}
+  }},
+}
+```
+
+### Supported Media Types
+
+Attachments support any media type including:
+- Text (HTML, CSS, JavaScript, Markdown)
+- Images (PNG, JPEG, GIF, SVG)
+- Audio and Video files
+- Binary data and documents
