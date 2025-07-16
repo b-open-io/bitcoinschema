@@ -137,7 +137,7 @@ export default function HomePage() {
             </h3>
             
             <div className="flex flex-wrap items-center justify-center gap-8 lg:gap-12 opacity-60">
-              {["HandCash", "Twetch", "TAAL", "Tokenized", "Relay"].map((company, index) => (
+              {["GorillaPool", "Taal", "HandCash", "1Sat", "Treechat"].map((company, index) => (
                 <div key={index} className="flex items-center space-x-2">
                   <div className="w-4 h-4 sm:w-5 sm:h-5 bg-foreground/20 rounded"></div>
                   <span className="text-muted-foreground font-medium text-sm sm:text-base">{company}</span>
