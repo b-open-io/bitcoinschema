@@ -17,12 +17,9 @@ export default function HomePage() {
             alt="Bitcoin Schema Logo"
             width={400}
             height={200}
-            className="mx-auto"
+            className="mx-auto h-auto w-auto max-w-lg"
           />
         </div>
-        <h1 className="text-6xl font-bold mb-4 text-foreground">
-          Bitcoin Schema
-        </h1>
         <p className="text-xl text-muted-foreground mb-8">
           Data definitions for Bitcoin applications
         </p>
