@@ -1,27 +1,25 @@
 import Link from 'next/link';
 import Image from 'next/image';
-import { ModeToggle } from '@/components/mode-toggle';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ArrowRight, Database, Link2, Users } from 'lucide-react';
 import { SchemaVisualization } from '@/components/schema-visualization';
+import { Navbar } from '@/components/navbar';
 
 export default function HomePage() {
   return (
-    <main className="flex min-h-screen flex-col bg-background relative overflow-hidden">
-      {/* Decorative elements - hidden on mobile for cleaner look */}
-      <div className="hidden sm:block absolute top-20 right-20 w-3 h-3 sm:w-4 sm:h-4 bg-primary/30 rounded-full"></div>
-      <div className="hidden sm:block absolute top-32 right-32 w-2 h-2 sm:w-3 sm:h-3 bg-primary/20 rounded-sm transform rotate-45"></div>
-      <div className="hidden sm:block absolute top-40 right-16 w-1 h-6 sm:w-2 sm:h-8 bg-primary/40"></div>
-      <div className="hidden sm:block absolute top-48 right-24 w-4 h-1 sm:w-6 sm:h-2 bg-primary/30"></div>
+    <div className="flex min-h-screen flex-col bg-background relative overflow-hidden">
+      <Navbar />
       
-      {/* Mode toggle */}
-      <div className="absolute top-4 right-4 z-10">
-        <ModeToggle />
-      </div>
-      
-      {/* Hero section */}
-      <section className="relative pt-16 md:pt-24 lg:pt-32 px-6">
+      <main className="flex-1">
+        {/* Decorative elements - hidden on mobile for cleaner look */}
+        <div className="hidden sm:block absolute top-20 right-20 w-3 h-3 sm:w-4 sm:h-4 bg-primary/30 rounded-full"></div>
+        <div className="hidden sm:block absolute top-32 right-32 w-2 h-2 sm:w-3 sm:h-3 bg-primary/20 rounded-sm transform rotate-45"></div>
+        <div className="hidden sm:block absolute top-40 right-16 w-1 h-6 sm:w-2 sm:h-8 bg-primary/40"></div>
+        <div className="hidden sm:block absolute top-48 right-24 w-4 h-1 sm:w-6 sm:h-2 bg-primary/30"></div>
+        
+        {/* Hero section */}
+        <section className="relative pt-16 md:pt-24 lg:pt-32 px-6">
         <div className="container mx-auto max-w-6xl">
           <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
             {/* Left column - content */}
@@ -64,9 +62,9 @@ export default function HomePage() {
             </div>
           </div>
         </div>
-      </section>
-      
-      {/* Features section */}
+        </section>
+        
+        {/* Features section */}
       <section className="py-20 px-6">
         <div className="container mx-auto max-w-6xl">
           <div className="text-center mb-12">
@@ -126,9 +124,9 @@ export default function HomePage() {
             </Card>
           </div>
         </div>
-      </section>
-      
-      {/* Partners section */}
+        </section>
+        
+        {/* Partners section */}
       <section className="pb-20 px-6">
         <div className="container mx-auto max-w-6xl">
           <div className="text-center">
@@ -146,18 +144,19 @@ export default function HomePage() {
             </div>
           </div>
         </div>
-      </section>
-      
-      {/* Logo - centered at the top */}
-      <div className="absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-1/2 opacity-5 pointer-events-none">
-        <Image
-          src="/bitcoin-schema-logo.svg"
-          alt="Bitcoin Schema Logo"
-          width={800}
-          height={400}
-          className="h-auto w-auto"
-        />
-      </div>
-    </main>
+        </section>
+        
+        {/* Background Logo */}
+        <div className="absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-1/2 opacity-5 pointer-events-none">
+          <Image
+            src="/bitcoin-schema-logo.svg"
+            alt="Bitcoin Schema Logo"
+            width={800}
+            height={400}
+            className="h-auto w-auto"
+          />
+        </div>
+      </main>
+    </div>
   );
 }
