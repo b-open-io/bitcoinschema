@@ -155,7 +155,7 @@ This project is licensed under the Open BSV License.
 ## 🆘 Support
 
 - [GitHub Issues](https://github.com/bitcoinschema/schema/issues)
-- [Slack Community](https://atlantistic.slack.com/app_redirect?channel=schema)
+- [Discord Community](https://discord.gg/vqj6wpKeEn)
 
 ---
 
