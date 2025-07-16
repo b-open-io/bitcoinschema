@@ -8,17 +8,7 @@ export default function Layout({ children }: { children: ReactNode }) {
     <DocsLayout
       tree={source.pageTree}
       nav={{
-        title: (
-          <div className="flex items-center gap-2">
-            <Image
-              src="/bitcoin-schema-logo.svg"
-              alt="Bitcoin Schema"
-              width={32}
-              height={32}
-            />
-            <span>Bitcoin Schema</span>
-          </div>
-        ),
+        title: 'Bitcoin Schema',
         url: '/',
       }}
       sidebar={{

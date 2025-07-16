@@ -5,15 +5,7 @@ export default function HomePage() {
   return (
     <main className="flex min-h-screen flex-col items-center justify-center p-8 bg-gradient-to-br from-blue-50 to-orange-50">
       <div className="max-w-4xl mx-auto text-center">
-        <div className="mb-6">
-          <Image
-            src="/bitcoin-schema-logo.svg"
-            alt="Bitcoin Schema Logo"
-            width={200}
-            height={200}
-            className="mx-auto"
-          />
-        </div>
+        {/* Logo will be added back once SVG is fixed */}
         <h1 className="text-6xl font-bold mb-4 bg-gradient-to-r from-blue-600 to-orange-600 bg-clip-text text-transparent">
           Bitcoin Schema
         </h1>
