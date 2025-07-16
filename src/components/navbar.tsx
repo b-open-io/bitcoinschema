@@ -20,9 +20,9 @@ export function Navbar() {
               alt="Bitcoin Schema"
               width={32}
               height={32}
-              className="h-8 w-8"
+              className="h-8 w-8 flex-shrink-0"
             />
-            <span className={`${montserrat.className} text-xl font-semibold text-foreground`}>
+            <span className={`${montserrat.className} text-xl font-semibold text-foreground leading-none`}>
               Bitcoin Schema
             </span>
           </Link>
