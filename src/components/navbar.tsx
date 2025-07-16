@@ -15,8 +15,8 @@ export function Navbar() {
         <div className="flex h-16 items-center justify-between">
           {/* Logo */}
           <Link href="/" className="flex items-center space-x-3">
-            <BitcoinLogo className="h-8 w-8 flex-shrink-0" />
-            <span className={`${montserrat.className} text-xl font-semibold text-foreground leading-none`}>
+            <BitcoinLogo className="h-10 w-10 flex-shrink-0" />
+            <span className={`${montserrat.className} text-xl font-semibold text-foreground leading-none flex items-center h-10`}>
               Bitcoin Schema
             </span>
           </Link>
