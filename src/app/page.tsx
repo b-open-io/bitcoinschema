@@ -1,9 +1,13 @@
 import Link from 'next/link';
 import Image from 'next/image';
+import { ModeToggle } from '@/components/mode-toggle';
 
 export default function HomePage() {
   return (
-    <main className="flex min-h-screen flex-col items-center justify-center p-8 bg-gradient-to-br from-blue-50 to-orange-50">
+    <main className="flex min-h-screen flex-col items-center justify-center p-8 bg-gradient-to-br from-blue-50 to-orange-50 dark:from-gray-900 dark:to-gray-800">
+      <div className="absolute top-4 right-4">
+        <ModeToggle />
+      </div>
       <div className="max-w-4xl mx-auto text-center">
         <div className="mb-8">
           <Image
@@ -17,27 +21,27 @@ export default function HomePage() {
         <h1 className="text-6xl font-bold mb-4 bg-gradient-to-r from-blue-600 to-orange-600 bg-clip-text text-transparent">
           Bitcoin Schema
         </h1>
-        <p className="text-xl text-gray-600 mb-8">
+        <p className="text-xl text-gray-600 dark:text-gray-300 mb-8">
           Data definitions for Bitcoin applications
         </p>
         <div className="mb-12">
-          <p className="text-lg text-gray-700 mb-6">
+          <p className="text-lg text-gray-700 dark:text-gray-300 mb-6">
             Community driven extensible schemas that enable developers to create interoperable data based applications on Bitcoin SV.
           </p>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-2xl mx-auto">
-            <div className="p-6 bg-white rounded-lg shadow-md">
-              <h3 className="text-lg font-semibold mb-2 text-blue-600">
+            <div className="p-6 bg-white dark:bg-gray-800 rounded-lg shadow-md">
+              <h3 className="text-lg font-semibold mb-2 text-blue-600 dark:text-blue-400">
                 🔗 Unlock Limitless Interoperability
               </h3>
-              <p className="text-gray-600">
+              <p className="text-gray-600 dark:text-gray-300">
                 Standardized data structures allow applications to seamlessly share and understand each other's data
               </p>
             </div>
-            <div className="p-6 bg-white rounded-lg shadow-md">
-              <h3 className="text-lg font-semibold mb-2 text-orange-600">
+            <div className="p-6 bg-white dark:bg-gray-800 rounded-lg shadow-md">
+              <h3 className="text-lg font-semibold mb-2 text-orange-600 dark:text-orange-400">
                 🤝 Build Collaborative Networks
               </h3>
-              <p className="text-gray-600">
+              <p className="text-gray-600 dark:text-gray-300">
                 Enable rich social interactions, content sharing, and collaborative features across applications
               </p>
             </div>
