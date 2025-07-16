@@ -1,10 +1,12 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import { ModeToggle } from '@/components/mode-toggle';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
 export default function HomePage() {
   return (
-    <main className="flex min-h-screen flex-col items-center justify-center p-8 bg-gradient-to-br from-blue-50 to-orange-50 dark:from-gray-900 dark:to-gray-800">
+    <main className="flex min-h-screen flex-col items-center justify-center p-8 bg-background">
       <div className="absolute top-4 right-4">
         <ModeToggle />
       </div>
@@ -18,48 +20,54 @@ export default function HomePage() {
             className="mx-auto"
           />
         </div>
-        <h1 className="text-6xl font-bold mb-4 bg-gradient-to-r from-blue-600 to-orange-600 bg-clip-text text-transparent">
+        <h1 className="text-6xl font-bold mb-4 text-foreground">
           Bitcoin Schema
         </h1>
-        <p className="text-xl text-gray-600 dark:text-gray-300 mb-8">
+        <p className="text-xl text-muted-foreground mb-8">
           Data definitions for Bitcoin applications
         </p>
         <div className="mb-12">
-          <p className="text-lg text-gray-700 dark:text-gray-300 mb-6">
+          <p className="text-lg text-muted-foreground mb-6">
             Community driven extensible schemas that enable developers to create interoperable data based applications on Bitcoin SV.
           </p>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-2xl mx-auto">
-            <div className="p-6 bg-white dark:bg-gray-800 rounded-lg shadow-md">
-              <h3 className="text-lg font-semibold mb-2 text-blue-600 dark:text-blue-400">
-                🔗 Unlock Limitless Interoperability
-              </h3>
-              <p className="text-gray-600 dark:text-gray-300">
-                Standardized data structures allow applications to seamlessly share and understand each other's data
-              </p>
-            </div>
-            <div className="p-6 bg-white dark:bg-gray-800 rounded-lg shadow-md">
-              <h3 className="text-lg font-semibold mb-2 text-orange-600 dark:text-orange-400">
-                🤝 Build Collaborative Networks
-              </h3>
-              <p className="text-gray-600 dark:text-gray-300">
-                Enable rich social interactions, content sharing, and collaborative features across applications
-              </p>
-            </div>
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-lg">
+                  🔗 Unlock Limitless Interoperability
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-muted-foreground">
+                  Standardized data structures allow applications to seamlessly share and understand each other's data
+                </p>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-lg">
+                  🤝 Build Collaborative Networks
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-muted-foreground">
+                  Enable rich social interactions, content sharing, and collaborative features across applications
+                </p>
+              </CardContent>
+            </Card>
           </div>
         </div>
-        <div className="space-x-4">
-          <Link
-            href="/docs"
-            className="inline-block bg-blue-600 text-white px-8 py-3 rounded-lg text-lg font-semibold hover:bg-blue-700 transition-colors"
-          >
-            Learn More
-          </Link>
-          <Link
-            href="/docs/schemas"
-            className="inline-block bg-orange-600 text-white px-8 py-3 rounded-lg text-lg font-semibold hover:bg-orange-700 transition-colors"
-          >
-            Browse Schemas
-          </Link>
+        <div className="flex gap-4">
+          <Button asChild size="lg">
+            <Link href="/docs">
+              Learn More
+            </Link>
+          </Button>
+          <Button asChild variant="outline" size="lg">
+            <Link href="/docs/schemas">
+              Browse Schemas
+            </Link>
+          </Button>
         </div>
       </div>
     </main>
