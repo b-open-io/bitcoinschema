@@ -4,6 +4,7 @@ import { ModeToggle } from '@/components/mode-toggle';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ArrowRight, Database, Link2, Users } from 'lucide-react';
+import { SchemaVisualization } from '@/components/schema-visualization';
 
 export default function HomePage() {
   return (
@@ -54,41 +55,7 @@ export default function HomePage() {
             
             {/* Right column - visual */}
             <div className="relative">
-              <div className="relative bg-card rounded-xl sm:rounded-2xl p-6 shadow-xl border transform hover:rotate-0 transition-transform duration-300 max-w-md mx-auto">
-                <div className="mb-4">
-                  <div className="text-sm text-muted-foreground mb-1">Bitcoin Schema</div>
-                  <div className="text-xs text-muted-foreground/70">Data Structure</div>
-                </div>
-                
-                {/* Schema visualization */}
-                <div className="grid grid-cols-6 gap-1 mb-4 bg-background/50 p-3 rounded-lg border">
-                  {Array.from({ length: 24 }, (_, i) => (
-                    <div
-                      key={i}
-                      className={`w-3 h-3 ${
-                        Math.random() > 0.7
-                          ? Math.random() > 0.5
-                            ? "bg-primary/40"
-                            : Math.random() > 0.5
-                              ? "bg-primary/30"
-                              : "bg-primary/20"
-                          : "bg-muted"
-                      } rounded-sm`}
-                    />
-                  ))}
-                </div>
-                
-                <div className="flex justify-between items-center text-sm">
-                  <div>
-                    <div className="mb-1">Schema: <span className="text-primary">User</span></div>
-                    <div className="text-muted-foreground text-xs">Status: Active</div>
-                  </div>
-                  <div className="text-right">
-                    <div className="mb-1">Version: 1.2.0</div>
-                    <div className="text-muted-foreground text-xs">Updated: 2 days ago</div>
-                  </div>
-                </div>
-              </div>
+              <SchemaVisualization />
               
               {/* Decorative elements */}
               <div className="absolute -top-4 -left-4 w-8 h-8 bg-primary/20 rounded-lg transform rotate-45"></div>
