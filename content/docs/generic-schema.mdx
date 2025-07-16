@@ -1,0 +1,52 @@
+---
+title: Generic Schemas
+description: General-purpose schemas that can be used for many use cases
+---
+
+# Generic Schemas
+
+These are generic schemas that can be used for many use cases.
+
+## Payment
+
+Payment is used to describe a payment sent from one identity to another. It is used by [BPP](https://github.com/icellan/bpp) when creating Content Paywalls.
+
+### OP_RETURN Format
+
+```
+MAP SET app <appname> type payment context tx tx <txId>
+```
+
+### Optional Parameters
+
+- Context
+- ContextValue
+- Subcontext
+- Subcontext Value
+
+### Use Cases
+
+- Content paywalls
+- Subscription payments
+- Tip payments
+- Service payments
+
+## Future Schemas
+
+More schemas will be added as common use cases are identified and implemented in the wild. Some potential future generic schemas include:
+
+- **Image** - For image metadata and references
+- **Handle** - For user handle registration and management
+- **Profile** - For user profile information
+
+## Contributing
+
+If you have ideas for new generic schemas, please:
+
+1. [Open an issue](https://github.com/bitcoinschema/schema/issues/new) to discuss your proposal
+2. Join our [Slack community](https://atlantistic.slack.com/app_redirect?channel=schema) for discussions
+3. Submit a pull request with your schema definition
+
+## Implementation
+
+For implementation examples and code samples, see our [Getting Started guide](/docs/getting-started).

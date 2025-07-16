@@ -1,0 +1,325 @@
+---
+title: Social Schemas
+description: Communication and social networking schemas for Bitcoin applications
+---
+
+# Social Schemas
+
+These schemas are the building blocks for building social networking apps. These on-chain records can be indexed and queried to build full-featured social platforms of all kinds.
+
+## Like
+
+Used to express positive sentiment about a post, transaction, or any other global identifier.
+
+### OP_RETURN Format
+
+```
+MAP SET app <appname> type like tx <txid> | AIP BITCOIN_ECDSA <address> <signature>
+```
+
+### go-bitcoin-schema
+
+```go
+tx, err := CreateLike(likeTxID, utxos, changeAddress, privateKey)
+```
+
+## Unlike
+
+Used to undo a like.
+
+### OP_RETURN Format
+
+```
+MAP SET app <appname> type unlike tx <txid> | AIP BITCOIN_ECDSA <address> <signature>
+```
+
+### go-bitcoin-schema
+
+```go
+tx, err := CreateUnlike(unlikeTxID, utxos, changeAddress, privateKey)
+```
+
+## Follow
+
+Used to express a one-way relationship between two identities.
+
+### OP_RETURN Format
+
+```
+MAP SET app <appname> type follow bapID <bapID> | AIP BITCOIN_ECDSA <address> <signature>
+```
+
+## Friend
+
+Used to express a two-way relationship between two identities and allow for secured communications. Generate the publicKey for future communications based on a SHA256 hash of the other user's bapID. (`getSigningPathFromHex` is a function from the BAP library).
+
+### Generate Public Key
+
+```js
+const seedHex = bsv.crypto.Hash.sha256(Buffer.from(friendIdKey)).toString("hex");
+const signingPath = getSigningPathFromHex(
+  Buffer.from(seedHex, "utf8").toString("hex")
+);
+const hdPrivateFriendKey = bsv.HDPrivateKey.deriveChild(signingPath);
+
+const publicFriendKey = hdPrivateFriendKey.privateKey.publicKey;
+```
+
+### OP_RETURN Format
+
+```
+MAP SET app <appname> type friend bapID <bapID> publicKey <publicFriendKey> | AIP BITCOIN_ECDSA <address> <signature>
+```
+
+### go-bitcoin-schema
+
+```go
+tx, err := CreateFollow(followIdKey, utxos, changeAddress, privateKey)
+```
+
+## Unfollow
+
+Used to express the removal of a relationship between two identities.
+
+### OP_RETURN Format
+
+```
+MAP SET app <appname> type unfollow bapID <pubkey> | AIP BITCOIN_ECDSA <address> <signature>
+```
+
+### go-bitcoin-schema
+
+```go
+tx, err := CreateUnfollow(unfollowIdKey, utxos, changeAddress, privateKey)
+```
+
+## Post
+
+Post is meant to express a new piece of content to the network.
+
+- B protocol is used for the content. This means the post could be anything from plain text, an image, some markdown, or even binary. Any file type can be expressed as a post.
+- Attachments can be made in addition to the post content (see [Attachments](#attachments))
+- The Context and Subcontext properties are optional. They allow you to post within a specific context such as a geolocation. Some contexts require more than 1 level, such as commenting on a YouTube video. In the case of youtube we use a context name of "provider" and a value of "youtube". We then specify a subcontext name of "videoID" and set the value to the YouTube video ID our post is associated with. This pattern allows us to comment on anything in a flexible way that is machine readable.
+
+### OP_RETURN Format
+
+```
+B <content> <mediaType> <encoding> | MAP SET app <appname> type post | AIP BITCOIN_ECDSA <address> <signature>
+```
+
+### Optional Parameters
+
+- Context
+- ContextValue
+- Subcontext
+- Subcontext Value
+
+### go-bitcoin-schema
+
+```go
+// identity key of the user you are requesting
+post := bschema.Post{
+  MediaType:        MediaTypeTextMarkdown,
+  Encoding:         EncodingUTF8,
+  Content:          "# Hello small world!",
+  Context:          ContextProvider,
+  ContextValue:     "youtube",
+  Subcontext:       ContextVideoID,
+  SubcontextValue:  "IdNs8eVGbBs",
+}
+tx, err := bschema.CreatePost(post, utxos, changeAddress, privateKey)
+```
+
+## Reply
+
+Replies are just Posts with a context of a transaction ID.
+
+### OP_RETURN Format
+
+```
+OP_FALSE OP_RETURN B <content> <mediaType> <encoding> | MAP SET app <appname> type post context tx tx <txid> | AIP BITCOIN_ECDSA <address> <signature>
+```
+
+### go-bitcoin-schema
+
+```go
+reply := bschema.Post{
+  MediaType:        MediaTypeTextMarkdown,
+  Encoding:         EncodingUTF8,
+  Content:          "# This is a markdown reply!",
+}
+tx, err := CreateReply(reply, replyTxID, utxos, changeAddress, privateKey)
+```
+
+## Repost
+
+A repost is used to amplify an existing post, without reposting the actual content. Like with a post, it is possible to repost with a new context and/or subcontext. This allows you to surface posts in multiple contexts. Imagine a post is made with a context of a UPC code (comment on a physical product). Someone might then repost that comment with a context of 'url' and value = the company's web address. This would repost that comment against the company website, surfacing it in new apps such as MetaLens.
+
+### Optional Parameters
+
+- Context
+- ContextValue
+- Subcontext
+- Subcontext Value
+
+### OP_RETURN Format
+
+```
+MAP SET app <appname> type repost tx <txid> | AIP BITCOIN_ECDSA <address> <signature>
+```
+
+### go-bitcoin-schema
+
+```go
+tx, err := CreateRepost(repostTxID, utxos, changeAddress, privateKey)
+```
+
+## Message
+
+Message is similar to post, but a separate namespace intended for real time chat content.
+
+- B protocol is used for the content. This means the chat message could be anything from plain text, an image, some markdown, or even binary. Any file type can be expressed as a message.
+- Attachments can be made in addition to the message content (see [Attachments](#attachments))
+- The Context and Subcontext properties are optional (see post for usage).
+
+### OP_RETURN Format
+
+**Global chat:**
+```
+B <content> <mediaType> <encoding> | MAP SET app <appname> type message | AIP BITCOIN_ECDSA <address> <signature>
+```
+
+**Specific channel:**
+```
+B <content> <mediaType> <encoding> | MAP SET app <appname> type message context channel channel my-chatroom | AIP BITCOIN_ECDSA <address> <signature>
+```
+
+**Specific user (private):**
+```
+B <content> <mediaType> <encoding> | MAP SET app <appname> type message context bapID bapID <recipient-bap-ID> | AIP BITCOIN_ECDSA <address> <signature>
+```
+
+### Optional Parameters
+
+- Context
+- ContextValue
+- Subcontext
+- Subcontext Value
+
+### go-bitcoin-schema
+
+```go
+message := bschema.Message{
+  MediaType:        MediaTypeTextPlain,
+  Encoding:         EncodingUTF8,
+  Content:          "Hello everyone in #my-channel!",
+  Context:          ContextChannel,
+  ContextValue:     "my-channel",
+}
+tx, err := bschema.CreateMessage(message, utxos, changeAddress, privateKey)
+```
+
+## Tags
+
+Tags allow you to categorize content. Unlike context, which determines when / where the content should be rendered and with what view, tags are a general purpose tool for aiding with search and filtering posts based on their tag values.
+
+Tags are added as an additional output, with the following format:
+
+### OP_RETURN Format
+
+```
+MAP ADD tags <tag1> <tag2> <tag3> ... | AIP BITCOIN_ECDSA <address> <signature>
+```
+
+### go-bitcoin-schema
+
+You can include tags on any post:
+
+```go
+postContent := "# This is a post"
+tags := []string{"tag1", "tag2", "tag3"}
+
+post := Post{
+  MediaType:  MediaTypeTextMarkdown,
+  Encoding:   EncodingUTF8,
+  Content:    postContent,
+  Tags:       tags,
+}
+```
+
+## Attachments
+
+Attachments are included as additional OP_RETURN outputs using B protocol, signed with AIP.
+
+### OP_RETURN Format
+
+**Attachment 1:**
+```
+B <attachment1Data> <mediaType> <encoding> | BITCOIN_ECDSA <address> <signature>
+```
+
+**Attachment 2:**
+```
+B <attachment2Data> <mediaType> <encoding> | BITCOIN_ECDSA <address> <signature>
+```
+
+### go-bitcoin-schema Example
+
+```go
+htmlAttachment := "<html><h1>This is a html attachment</h1></html>"
+cssAttachment := "body { background-color: green; }"
+postContent := "# This is a reply!"
+
+post := Post{
+  MediaType:  MediaTypeTextMarkdown,
+  Encoding:   EncodingUTF8,
+  Content:    postContent,
+  Tags:       tags,
+  Attachments: []b.B{{
+    MediaType:  string(MediaTypeTextHTML),
+    Encoding:   string(EncodingUTF8),
+    Data:       b.Data{UTF8: htmlAttachment},
+  },{
+    MediaType: string(MediaTypeTextHTML),
+    Encoding: string(EncodingUTF8),
+    Data: b.Data{UTF8: cssAttachment}
+  }},
+}
+```
+
+## Function
+
+The `function` type registers the intent to service function calls. Properly formatted functions calls will be executed by the registering application when a call is detected. The `argsType` parameter is a stringified [AJV schema](https://ajv.js.org/). This stringified JSON object is used to define the arguments and types accepted by the function. This allows the application to know exactly how to create function calls and pass arguments correctly. The `price` parameter is the price in satoshis that the application will charge to execute the function. The `name` parameter is the name of the function. You must sign the function registration with a BAP signing key (this is how function calls are uniquely identified while still allowing for function updates).
+
+### OP_RETURN Format
+
+```
+MAP SET app <appname> type function name <functionName> argsType <objectTypeLiteral> price <satoshiPrice> | AIP BITCOIN_ECDSA address <signature>
+```
+
+When looking up functions, indexers should deliver the most recent function record matches the function name and bapID. This allows developers to update their functions over time, and have the most recent version be the one that is executed.
+
+### Example
+
+Let's say you had a bot that responded to mentions. You might define a function that takes the message as a parameter. The `argsType` would be this:
+
+```js
+{
+  message: string,
+}
+```
+
+## Function Call
+
+Calls are used to execute functions registered on the blockchain. Calls are made using the MAP protocol, and are executed by the application when a transaction is broadcast that matches the call definition. Since function names are not unique, a context of bapID is used to target a function by referencing the identity of the registering application. `args` is a stringified JSON object that can be used to pass arguments to the function.
+
+### OP_RETURN Format
+
+```
+MAP SET app <appname> type function name <functionName> args <args> context bapID bapID <bapID> | AIP BITCOIN_ECDSA address <signature>
+```
+
+## Protocol References
+
+- **MAP** is a placeholder for the Magic Attribute Protocol prefix, which is `1PuQa7K62MiKCtssSLKy1kh56WWU7MtUR5`
+- **AIP** is a placeholder for the Author Identity Protocol prefix, which is `15PciHG22SNLQJXMoSUaWVi7WSqc7hCfva`

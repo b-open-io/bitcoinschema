@@ -1,0 +1,39 @@
+{
+  "name": "bitcoin-schema-org",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev --turbopack",
+    "build": "next build",
+    "start": "next start",
+    "lint": "biome lint .",
+    "lint:fix": "biome lint --write .",
+    "format": "biome format --write .",
+    "check": "biome check --apply .",
+    "test": "bun test --preload ./src/__tests__/setup-env.ts",
+    "preview": "next build && next start",
+    "clean": "rm -rf .next && rm -rf out",
+    "type-check": "tsc --noEmit"
+  },
+  "dependencies": {
+    "fumadocs-core": "^15.6.4",
+    "fumadocs-mdx": "^11.6.11",
+    "fumadocs-ui": "^15.6.4",
+    "next": "15.4.1",
+    "react": "19.1.0",
+    "react-dom": "19.1.0"
+  },
+  "devDependencies": {
+    "typescript": "^5.8.3",
+    "@types/node": "^20.19.8",
+    "@types/react": "^19.1.8",
+    "@types/react-dom": "^19.1.6",
+    "@tailwindcss/postcss": "^4.1.11",
+    "tailwindcss": "^4.1.11",
+    "@biomejs/biome": "latest",
+    "@testing-library/react": "latest",
+    "@testing-library/dom": "latest",
+    "jsdom": "latest",
+    "@types/jsdom": "latest"
+  }
+}
