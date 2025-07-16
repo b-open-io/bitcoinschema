@@ -25,7 +25,7 @@ export default function HomePage() {
             {/* Left column - content */}
             <div className="text-center lg:text-left">
               <div className="inline-flex items-center px-3 py-1 mb-6 rounded-full border border-border bg-background/50 text-sm text-muted-foreground">
-                <span className="mr-2">🚀</span> Community Driven Standards
+                Community Driven Standards
               </div>
               
               <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold tracking-tight mb-6">
