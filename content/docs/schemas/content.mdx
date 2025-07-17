@@ -38,7 +38,7 @@ The Context and Subcontext properties allow flexible content organization:
 - **Platform Integration**: Comment on YouTube videos using context "provider" = "youtube" and subcontext "videoID" = video ID
 - **Product Reviews**: Comment on products using UPC codes as context
 
-### go-bitcoin-schema
+### JavaScript Example
 
 ```go
 // Basic post
@@ -72,7 +72,7 @@ Replies are Posts with a context of a transaction ID, creating threaded conversa
 B <content> <mediaType> <encoding> | MAP SET app <appname> type post context tx tx <txid> | AIP BITCOIN_ECDSA <address> <signature>
 ```
 
-### go-bitcoin-schema
+### JavaScript Example
 
 ```go
 reply := bschema.Post{
@@ -104,7 +104,7 @@ Imagine a post commenting on a physical product (UPC code context). Someone migh
 MAP SET app <appname> type repost tx <txid> | AIP BITCOIN_ECDSA <address> <signature>
 ```
 
-### go-bitcoin-schema
+### JavaScript Example
 
 ```go
 tx, err := CreateRepost(repostTxID, utxos, changeAddress, privateKey)

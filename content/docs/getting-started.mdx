@@ -60,22 +60,26 @@ payload.outputs = [...payload.outputs.concat(toOuts)];
 let response = await relayOne.send(payload);
 ```
 
-### Go
+### Real Transaction Example
 
-A library is available for doing this automatically with Go called [go-bitcoin-schema](https://github.com/bitcoinschema/go-bitcoin-schema). Creating a like is as simple as:
+Here's a real MAP protocol transaction that was broadcast to the Bitcoin SV blockchain:
 
-```go
-import "github.com/bitcoinschema/go-bitcoin-schema"
+**Transaction ID:** `cdfe7ae5c91afe4dc3a5db383e0ca948ec3d51dc2954a9d18ca464db7c9d5d3d`
+
+This transaction uses the MAP protocol to set paymail verification data:
+
+```
+1PuQa7K62MiKCtssSLKy1kh56WWU7MtUR5  // MAP Protocol Prefix
+SET                                  // MAP Command
+app                                  // Key
+2paymail                            // Value
+paymail                             // Key
+hagbard@moneybutton.com             // Value
+public_key                          // Key
+02c89b6790eb605062a31f124250594bd0fd02988da2541b3d25e7ef3937fb4ae0  // Value
 ```
 
-```go
-tx, err := CreateUnlike(unlikeTxID, utxos, changeAddress, privateKey)
-if err != nil {
-  // handle error
-}
-
-// do something with tx...
-```
+You can view this transaction on any BSV block explorer or query it using BMAP APIs.
 
 ## Getting Help
 

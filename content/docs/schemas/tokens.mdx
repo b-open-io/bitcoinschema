@@ -1,0 +1,23 @@
+---
+title: Token Schemas
+description: Token and ordinals-related schemas
+---
+
+# Token Schemas
+
+Schemas for token and ordinals functionality on Bitcoin SV.
+
+## Ord
+
+The `ord` schema type is used for adding metadata to ordinals inscriptions.
+
+### OP_RETURN Format
+
+```
+MAP SET app <appname> type ord <metadata> | AIP BITCOIN_ECDSA <address> <signature>
+```
+
+### Documentation
+
+For detailed information about the ord schema type and how to add metadata to ordinals, see:
+- [1Sat Ordinals Documentation - Ord Schema Type](https://docs.1satordinals.com/adding-metadata/ord-schema-type)

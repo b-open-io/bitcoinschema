@@ -19,7 +19,7 @@ export default function HomePage() {
         <div className="hidden sm:block absolute top-48 right-24 w-4 h-1 sm:w-6 sm:h-2 bg-primary/30"></div>
         
         {/* Hero section */}
-        <section className="relative pt-16 md:pt-24 lg:pt-32 px-6">
+        <section className="relative pt-20 md:pt-28 lg:pt-36 px-6">
         <div className="container mx-auto max-w-6xl">
           <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
             {/* Left column - content */}

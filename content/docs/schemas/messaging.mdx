@@ -41,7 +41,7 @@ B <content> <mediaType> <encoding> | MAP SET app <appname> type message context 
 - Subcontext
 - Subcontext Value
 
-### go-bitcoin-schema
+### JavaScript
 
 ```go
 // Channel message
@@ -67,7 +67,7 @@ Tags are added as an additional output:
 MAP ADD tags <tag1> <tag2> <tag3> ... | AIP BITCOIN_ECDSA <address> <signature>
 ```
 
-### go-bitcoin-schema
+### JavaScript
 
 You can include tags on any post or message:
 
@@ -101,7 +101,7 @@ B <attachment1Data> <mediaType> <encoding> | BITCOIN_ECDSA <address> <signature>
 B <attachment2Data> <mediaType> <encoding> | BITCOIN_ECDSA <address> <signature>
 ```
 
-### go-bitcoin-schema Example
+### JavaScript Example
 
 ```go
 htmlAttachment := "<html><h1>This is an HTML attachment</h1></html>"
