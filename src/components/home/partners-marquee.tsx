@@ -11,6 +11,9 @@ const companies = [
   'yours.org',
   'fbx.fun',
   '1sat.market',
+  'themetoken.dev',
+  'alchema.world',
+  'mintflow.me',
 ];
 
 export function PartnersMarquee() {

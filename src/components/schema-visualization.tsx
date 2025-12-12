@@ -45,20 +45,25 @@ export function SchemaVisualization() {
       
       {/* Schema visualization */}
       <div className="grid grid-cols-6 gap-1 mb-4 bg-background/50 p-3 rounded-lg border">
-        {Array.from({ length: 24 }, (_, i) => (
-          <div
-            key={i}
-            className={`w-3 h-3 ${
-              Math.random() > 0.7
-                ? Math.random() > 0.5
-                  ? "bg-primary/40"
-                  : Math.random() > 0.5
-                    ? "bg-primary/30"
-                    : "bg-primary/20"
-                : "bg-muted"
-            } rounded-sm`}
-          />
-        ))}
+        {Array.from({ length: 24 }, (_, i) => {
+          // Deterministic pattern generation based on index
+          const hash = (i * 137 + 13) % 100;
+          let colorClass = "bg-muted";
+          
+          if (hash > 70) {
+            const variantHash = (i * 37) % 100;
+            if (variantHash > 66) colorClass = "bg-primary/40";
+            else if (variantHash > 33) colorClass = "bg-primary/30";
+            else colorClass = "bg-primary/20";
+          }
+          
+          return (
+            <div
+              key={i}
+              className={`w-3 h-3 ${colorClass} rounded-sm`}
+            />
+          );
+        })}
       </div>
       
       <div className="flex justify-between items-center text-sm">
