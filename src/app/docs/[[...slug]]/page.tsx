@@ -4,31 +4,36 @@ import {
   DocsBody,
   DocsDescription,
   DocsTitle,
-} from 'fumadocs-ui/page';
+} from 'fumadocs-ui/layouts/docs/page';
 import { notFound } from 'next/navigation';
-import defaultMdxComponents from 'fumadocs-ui/mdx';
+import { getMDXComponents } from '@/mdx-components';
+import { createRelativeLink } from 'fumadocs-ui/mdx';
+import type { Metadata } from 'next';
 
 interface PageProps {
-  params: Promise<{ slug?: string[] }>; // Next.js 15 async params!
+  params: Promise<{ slug?: string[] }>;
 }
 
 export default async function Page(props: PageProps) {
   const params = await props.params;
-  const page = source.getPage(params.slug || []);
-  
+  const page = source.getPage(params.slug);
+
   if (!page) notFound();
 
-  // SYNC MODE - direct access to body and toc
-  const MDX = (page.data as any).body;
+  const MDX = page.data.body;
 
   return (
-    <DocsPage toc={(page.data as any).toc}>
+    <DocsPage toc={page.data.toc} full={page.data.full}>
       <DocsTitle>{page.data.title}</DocsTitle>
       {page.data.description && (
         <DocsDescription>{page.data.description}</DocsDescription>
       )}
       <DocsBody>
-        <MDX components={defaultMdxComponents} />
+        <MDX
+          components={getMDXComponents({
+            a: createRelativeLink(source, page),
+          })}
+        />
       </DocsBody>
     </DocsPage>
   );
@@ -38,12 +43,11 @@ export async function generateStaticParams() {
   return source.generateParams();
 }
 
-// Generate metadata
-export async function generateMetadata(props: PageProps) {
+export async function generateMetadata(props: PageProps): Promise<Metadata> {
   const params = await props.params;
-  const page = source.getPage(params.slug || []);
-  
-  if (!page) return {};
+  const page = source.getPage(params.slug);
+
+  if (!page) notFound();
 
   return {
     title: page.data.title,
