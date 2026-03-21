@@ -17,7 +17,7 @@ Output 1:  file inscription (1 sat) — refs/example.md
 ...
 Output N:  manifest inscription (1 sat, tracked ordinal)
            Content-Type: ord-fs/json
-           Content: { "SKILL.md": "{{vout:0}}", "refs/example.md": "{{vout:1}}" }
+           Content: { "SKILL.md": "_0", "refs/example.md": "_1" }
            MAP: { app, type, name, version, language, ... }
            AIP: author signature
 ```
@@ -30,13 +30,13 @@ The manifest is an inscription with content type `ord-fs/json`. Its content is a
 
 ```json
 {
-  "SKILL.md": "{{vout:0}}",
-  "refs/example.md": "{{vout:1}}",
-  "scripts/setup.sh": "{{vout:2}}"
+  "SKILL.md": "_0",
+  "refs/example.md": "_1",
+  "scripts/setup.sh": "_2"
 }
 ```
 
-After broadcast, indexers resolve `{{vout:N}}` placeholders to `ord://{txid}_{N}`. ORDFS serves the package as a directory — requesting `/content/{manifestOutpoint}/SKILL.md` returns the file content.
+The `_N` values are relative vout references — ORDFS resolves them to `{manifest_txid}_{N}` using the directory inscription's own txid. Requesting `/content/{manifestOutpoint}/SKILL.md` returns the file content via directory traversal.
 
 ### MAP Metadata
 
@@ -199,7 +199,7 @@ const outputs = files.map(f => {
 
 // Build ord-fs/json manifest
 const manifest = {};
-files.forEach((f, i) => { manifest[f.path] = `{{vout:${i}}}`; });
+files.forEach((f, i) => { manifest[f.path] = `_${i}`; });
 
 // MAP metadata
 const mapFields = {
