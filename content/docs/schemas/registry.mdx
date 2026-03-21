@@ -13,11 +13,11 @@ A registry item is a multi-output ordinal inscription where individual files are
 
 ```
 Output 0:  file inscription (1 sat) — SKILL.md content
-Output 1:  file inscription (1 sat) — refs/example.md
+Output 1:  file inscription (1 sat) — example.md
 ...
 Output N:  manifest inscription (1 sat, tracked ordinal)
            Content-Type: ord-fs/json
-           Content: { "SKILL.md": "_0", "refs/example.md": "_1" }
+           Content: { "SKILL.md": "_0", "example.md": "_1" }
            MAP: { app, type, name, version, language, ... }
            AIP: author signature
 ```
@@ -26,17 +26,18 @@ Each file output is a standard ordinal inscription with a P2PKH prefix (spendabl
 
 ### Manifest Format (ord-fs/json)
 
-The manifest is an inscription with content type `ord-fs/json`. Its content is a JSON object mapping file paths to sibling output references:
+The manifest is an inscription with content type `ord-fs/json`. Its content is a JSON object mapping filenames to sibling output references using relative vout notation:
 
 ```json
 {
   "SKILL.md": "_0",
-  "refs/example.md": "_1",
-  "scripts/setup.sh": "_2"
+  "example.md": "_1"
 }
 ```
 
-The `_N` values are relative vout references — ORDFS resolves them to `{manifest_txid}_{N}` using the directory inscription's own txid. Requesting `/content/{manifestOutpoint}/SKILL.md` returns the file content via directory traversal.
+The `_N` values are relative vout references — the underscore-vout suffix from the standard outpoint format (`txid_vout`), without the txid. ORDFS resolves `_N` to `{manifest_txid}_{N}` using the directory inscription's own txid. Requesting `/content/{manifestOutpoint}/SKILL.md` returns the file content via directory traversal.
+
+For nested directories (e.g., `refs/api.md`), create a separate `ord-fs/json` inscription for the subdirectory and reference it from the root manifest. ORDFS traverses nested directories by following the chain of `ord-fs/json` inscriptions.
 
 ### MAP Metadata
 
@@ -184,7 +185,7 @@ import { PrivateKey, Utils } from "@bsv/sdk";
 // Build file inscriptions
 const files = [
   { path: "SKILL.md", content: skillMarkdown, contentType: "text/markdown" },
-  { path: "refs/api.md", content: apiDocs, contentType: "text/markdown" },
+  { path: "example.md", content: exampleDocs, contentType: "text/markdown" },
 ];
 
 const p2pkh = new P2PKH().lock(privateKey.toAddress());
