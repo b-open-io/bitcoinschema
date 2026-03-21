@@ -55,6 +55,12 @@ MAP SET app <registry> type <registryType> name <name> version <version> ...
 | `version` | Yes | Semantic version (e.g. `1.0.0`) |
 | `description` | Yes | Human-readable description of the package |
 | `language` | No | BCP 47 language tag (e.g. `en`, `zh`, `ja`, `es`, `ko`). Indicates the primary language of the package content. Defaults to `en` if omitted. |
+| `title` | No | Human-readable display title (e.g. "Bitcoin Avatar") |
+| `author` | No | Author name or identifier |
+| `dependencies` | No | JSON-serialized array of npm package dependencies |
+| `devDependencies` | No | JSON-serialized array of dev dependencies |
+| `registryDependencies` | No | JSON-serialized array of other registry items this depends on |
+| `categories` | No | JSON-serialized array of category tags |
 | `homepage` | No | URL to the package's homepage or repository |
 | `prev` | No | Previous manifest outpoint for version chaining |
 | `opns.name` | No | OpNS name if the publisher owns it (trust signal) |
@@ -78,14 +84,17 @@ All types use the `registry:` prefix for consistency across the shadcn ecosystem
 
 | Type | Description |
 |------|-------------|
-| `registry:style` | CSS theme styles (Tailwind presets, color schemes) |
-| `registry:theme` | Complete visual themes with fonts, patterns, colors |
+| `registry:lib` | Utility libraries |
 | `registry:block` | Multi-component page sections (hero, pricing table) |
 | `registry:component` | Reusable UI components |
 | `registry:ui` | Base UI primitives |
 | `registry:hook` | React hooks |
-| `registry:lib` | Utility libraries |
 | `registry:page` | Full page templates |
+| `registry:file` | Generic file (not categorized) |
+| `registry:theme` | Complete visual themes with fonts, patterns, colors |
+| `registry:style` | CSS theme styles (Tailwind presets, color schemes) |
+| `registry:example` | Example/demo code |
+| `registry:internal` | Internal implementation files |
 
 ### ClawNet Extension Types
 
@@ -94,6 +103,25 @@ All types use the `registry:` prefix for consistency across the shadcn ecosystem
 | `registry:skill` | AI agent skills (SKILL.md + reference files) |
 | `registry:agent` | AI agent definitions (frontmatter + system prompt) |
 | `registry:organization` | Agent organizations (agent roster + skills) |
+
+## Cross-Registry Publishing
+
+The registry package format is designed for cross-registry interoperability. Components from any shadcn-compatible registry can be published on-chain:
+
+| Source Registry | Type | Example |
+|----------------|------|---------|
+| BigBlocks | `registry:block`, `registry:ui` | Bitcoin wallet components, social feeds |
+| theme-token | `registry:theme`, `registry:style` | Visual themes with bundled fonts/patterns |
+| ClawNet | `registry:skill`, `registry:agent` | AI agent skills and configurations |
+
+All registries share the same `registry:*` type system, `_N` relative vout references, and `ord-fs/json` manifest format. A BigBlocks component published on-chain is installable via any compatible gateway:
+
+```bash
+bunx shadcn@latest add https://clawnet.sh/r/blocks/bitcoin-avatar
+bunx shadcn@latest add https://bigblocks.dev/r/bitcoin-avatar.json
+```
+
+Both serve the same shadcn-compatible JSON — one from on-chain data, one from the registry server.
 
 ## Language Support
 
@@ -205,11 +233,16 @@ files.forEach((f, i) => { manifest[f.path] = `_${i}`; });
 // MAP metadata
 const mapFields = {
   app: "clawnet",
-  type: "registry:skill",
-  name: "my-skill",
+  type: "registry:block",
+  name: "bitcoin-avatar",
   version: "1.0.0",
-  description: "A useful skill",
+  description: "Bitcoin identity avatar with on-chain profile resolution",
+  title: "Bitcoin Avatar",
+  author: "Satchmo",
   language: "en",
+  dependencies: JSON.stringify(["@radix-ui/react-avatar"]),
+  registryDependencies: JSON.stringify(["button"]),
+  categories: JSON.stringify(["identity", "social"]),
 };
 
 // Create manifest inscription with MAP + AIP suffix
