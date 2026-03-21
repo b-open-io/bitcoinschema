@@ -1,0 +1,221 @@
+---
+title: Registry
+description: On-chain package registry for skills, agents, themes, and components
+---
+
+Schemas for publishing and discovering registry items on-chain. Registry items are multi-file packages inscribed as ordinals with `ord-fs/json` manifests, making them natively servable by ORDFS and installable via the shadcn CLI protocol.
+
+## Registry Item
+
+A registry item is a multi-output ordinal inscription where individual files are 1-sat inscription outputs and a manifest ordinal ties them together with metadata.
+
+### Transaction Structure
+
+```
+Output 0:  file inscription (1 sat) — SKILL.md content
+Output 1:  file inscription (1 sat) — refs/example.md
+...
+Output N:  manifest inscription (1 sat, tracked ordinal)
+           Content-Type: ord-fs/json
+           Content: { "SKILL.md": "{{vout:0}}", "refs/example.md": "{{vout:1}}" }
+           MAP: { app, type, name, version, language, ... }
+           AIP: author signature
+```
+
+Each file output is a standard ordinal inscription with a P2PKH prefix (spendable). The manifest output is the package's on-chain identity — it goes in the `ordinals` basket and is the outpoint used to reference the package.
+
+### Manifest Format (ord-fs/json)
+
+The manifest is an inscription with content type `ord-fs/json`. Its content is a JSON object mapping file paths to sibling output references:
+
+```json
+{
+  "SKILL.md": "{{vout:0}}",
+  "refs/example.md": "{{vout:1}}",
+  "scripts/setup.sh": "{{vout:2}}"
+}
+```
+
+After broadcast, indexers resolve `{{vout:N}}` placeholders to `ord://{txid}_{N}`. ORDFS serves the package as a directory — requesting `/content/{manifestOutpoint}/SKILL.md` returns the file content.
+
+### MAP Metadata
+
+Registry items carry MAP metadata on the manifest inscription following the standard `MAP SET` protocol:
+
+```
+MAP SET app <registry> type <registryType> name <name> version <version> ...
+```
+
+| Field | Required | Description |
+|-------|----------|-------------|
+| `app` | Yes | Registry identifier (e.g. `clawnet`) |
+| `type` | Yes | Registry type with `registry:` prefix (see types below) |
+| `name` | Yes | Package name (lowercase, hyphenated, 1-64 chars) |
+| `version` | Yes | Semantic version (e.g. `1.0.0`) |
+| `description` | Yes | Human-readable description of the package |
+| `language` | No | BCP 47 language tag (e.g. `en`, `zh`, `ja`, `es`, `ko`). Indicates the primary language of the package content. Defaults to `en` if omitted. |
+| `homepage` | No | URL to the package's homepage or repository |
+| `prev` | No | Previous manifest outpoint for version chaining |
+| `opns.name` | No | OpNS name if the publisher owns it (trust signal) |
+| `opns.outpoint` | No | Outpoint of the OpNS name ordinal |
+
+### AIP Signature
+
+The manifest is signed using AIP (Author Identity Protocol) to prove authorship:
+
+```
+AIP BITCOIN_ECDSA <signerAddress> <signature>
+```
+
+The signature covers the MAP protocol data, enabling any indexer to verify the publisher's identity without trusting a central registry.
+
+## Registry Types
+
+All types use the `registry:` prefix for consistency across the shadcn ecosystem and ClawNet extensions.
+
+### shadcn/ui Standard Types
+
+| Type | Description |
+|------|-------------|
+| `registry:style` | CSS theme styles (Tailwind presets, color schemes) |
+| `registry:theme` | Complete visual themes with fonts, patterns, colors |
+| `registry:block` | Multi-component page sections (hero, pricing table) |
+| `registry:component` | Reusable UI components |
+| `registry:ui` | Base UI primitives |
+| `registry:hook` | React hooks |
+| `registry:lib` | Utility libraries |
+| `registry:page` | Full page templates |
+
+### ClawNet Extension Types
+
+| Type | Description |
+|------|-------------|
+| `registry:skill` | AI agent skills (SKILL.md + reference files) |
+| `registry:agent` | AI agent definitions (frontmatter + system prompt) |
+| `registry:organization` | Agent organizations (agent roster + skills) |
+
+## Language Support
+
+The `language` field uses [BCP 47](https://www.rfc-editor.org/info/bcp47) language tags to declare the primary language of a package's content. This enables:
+
+- **Filtering**: Registries can filter and sort by language
+- **Discovery**: Users find packages in their preferred language
+- **Indexing**: Search engines and AI systems can index content appropriately
+
+Common values:
+
+| Tag | Language |
+|-----|----------|
+| `en` | English |
+| `zh` | Chinese |
+| `ja` | Japanese |
+| `ko` | Korean |
+| `es` | Spanish |
+| `fr` | French |
+| `de` | German |
+| `pt` | Portuguese |
+| `ru` | Russian |
+| `ar` | Arabic |
+
+Packages without a `language` field are assumed to be English (`en`).
+
+## Installation Protocols
+
+Registry items support multiple installation paths:
+
+### By OpNS Name
+
+When the publisher owns the OpNS name matching their package slug:
+
+```bash
+npx clawnet add humanize
+```
+
+The CLI resolves the OpNS name on-chain, finds the bound identity key, looks up the latest manifest outpoint, and installs from ORDFS.
+
+### By Outpoint
+
+Direct installation from a manifest outpoint:
+
+```bash
+npx clawnet add {txid}_{vout}
+```
+
+### By shadcn CLI
+
+Registry items are compatible with the shadcn CLI protocol:
+
+```bash
+bunx shadcn@latest add https://clawnet.sh/r/skills/humanize
+bunx shadcn@latest add https://clawnet.sh/r/themes/{origin}
+bunx shadcn@latest add https://clawnet.sh/r/components/{origin}
+```
+
+The gateway at `/r/{type}/{origin}` fetches the manifest from ORDFS, hydrates file content from sibling inscriptions, and returns shadcn-compatible JSON.
+
+## Version Chaining
+
+Packages form a version chain via the `prev` MAP field. Each new version references the previous manifest outpoint:
+
+```
+v1.0.0  →  manifest_outpoint_a
+v1.1.0  →  manifest_outpoint_b  (prev: manifest_outpoint_a)
+v2.0.0  →  manifest_outpoint_c  (prev: manifest_outpoint_b)
+```
+
+This creates a verifiable on-chain history without requiring a central version database.
+
+## Registry Discovery
+
+Registries declare themselves on-chain via MAP metadata with `app` as the registry identifier. Any indexer can discover and aggregate registry items by querying for transactions with:
+
+```
+MAP SET app <registry> type registry:*
+```
+
+This enables a decentralized ecosystem where multiple registries can coexist and cross-reference items.
+
+## JavaScript Example
+
+```typescript
+import { Inscription, MAP, AIP, PrivateKeySigner, P2PKH } from "@1sat/templates";
+import { PrivateKey, Utils } from "@bsv/sdk";
+
+// Build file inscriptions
+const files = [
+  { path: "SKILL.md", content: skillMarkdown, contentType: "text/markdown" },
+  { path: "refs/api.md", content: apiDocs, contentType: "text/markdown" },
+];
+
+const p2pkh = new P2PKH().lock(privateKey.toAddress());
+const outputs = files.map(f => {
+  const inscription = Inscription.create(
+    new Uint8Array(Utils.toArray(f.content, "utf8")),
+    f.contentType,
+    { scriptPrefix: p2pkh }
+  );
+  return { script: inscription.lock(), satoshis: 1 };
+});
+
+// Build ord-fs/json manifest
+const manifest = {};
+files.forEach((f, i) => { manifest[f.path] = `{{vout:${i}}}`; });
+
+// MAP metadata
+const mapFields = {
+  app: "clawnet",
+  type: "registry:skill",
+  name: "my-skill",
+  version: "1.0.0",
+  description: "A useful skill",
+  language: "en",
+};
+
+// Create manifest inscription with MAP + AIP suffix
+const manifestInscription = Inscription.create(
+  new Uint8Array(Utils.toArray(JSON.stringify(manifest), "utf8")),
+  "ord-fs/json",
+  { scriptPrefix: p2pkh, scriptSuffix: buildMapAipSuffix(mapFields, privateKey) }
+);
+outputs.push({ script: manifestInscription.lock(), satoshis: 1 });
+```
