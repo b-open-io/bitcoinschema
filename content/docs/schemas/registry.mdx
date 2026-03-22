@@ -356,7 +356,8 @@ This enables a decentralized ecosystem where multiple registries can coexist and
 ### Skill Package
 
 ```typescript
-import { buildPackageOutputs } from "@1sat/actions";
+// buildPackageOutputs from the ClawNet CLI package system
+import { buildPackageOutputs } from "clawnet/package/package-tx";
 
 const result = await buildPackageOutputs(
   [
