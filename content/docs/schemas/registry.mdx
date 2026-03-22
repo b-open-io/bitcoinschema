@@ -91,8 +91,9 @@ All types use the `registry:` prefix for consistency across the shadcn ecosystem
 | `registry:hook` | React hooks |
 | `registry:page` | Full page templates |
 | `registry:file` | Generic file (not categorized) |
-| `registry:theme` | Complete visual themes with fonts, patterns, colors |
-| `registry:style` | CSS theme styles (Tailwind presets, color schemes) |
+| `registry:font` | Individual font file with metadata (family, weights, subsets) |
+| `registry:style` | CSS variables and rules — color schemes, typography presets, spacing |
+| `registry:theme` | Complete visual theme — style + bundled assets (fonts, patterns, wallpapers) |
 | `registry:example` | Example/demo code |
 | `registry:internal` | Internal implementation files |
 
@@ -104,6 +105,133 @@ All types use the `registry:` prefix for consistency across the shadcn ecosystem
 | `registry:agent` | AI agent definitions (frontmatter + system prompt) |
 | `registry:organization` | Agent organizations (agent roster + skills) |
 
+## Design Asset Types
+
+Design assets form a composability stack: individual fonts are installable standalone, styles compose fonts into typography systems, and themes bundle everything into a complete visual package.
+
+### registry:font
+
+An individual font file with metadata describing its typographic properties. The manifest wraps a single font file (`.woff2`, `.woff`, `.ttf`) with structured metadata.
+
+**Transaction structure:**
+```
+Output 0:  font file inscription (font/woff2, 1 sat)
+Output 1:  manifest (ord-fs/json, 1 sat, MAP + AIP)
+           { "space-grotesk.woff2": "_0" }
+```
+
+**Additional MAP fields for fonts:**
+
+| Field | Required | Description |
+|-------|----------|-------------|
+| `font.family` | Yes | CSS font-family name (e.g. `Space Grotesk Variable`) |
+| `font.variable` | Yes | CSS custom property name (e.g. `--font-space-grotesk`) |
+| `font.weight` | No | JSON array of available weights (e.g. `["400","500","700"]`) |
+| `font.subsets` | No | JSON array of character subsets (e.g. `["latin","cyrillic"]`) |
+| `font.style` | No | Font style — `normal` or `italic` (default: `normal`) |
+| `license` | No | License identifier (e.g. `OFL-1.1`, `CC0`, `MIT`) |
+
+**Example MAP:**
+```
+MAP SET app theme-token type registry:font name space-grotesk
+    version 1.0.0 description "Space Grotesk variable weight sans-serif"
+    font.family "Space Grotesk Variable" font.variable "--font-space-grotesk"
+    font.weight ["400","500","600","700"] font.subsets ["latin","latin-ext"]
+    license OFL-1.1 categories ["sans-serif","variable","geometric"]
+```
+
+### registry:style
+
+CSS variables and rules without bundled asset files. Styles are composable — they reference fonts and other styles via `registryDependencies` rather than bundling them.
+
+Use cases:
+- **Color schemes** — OKLCH color variables for light/dark modes
+- **Typography presets** — font variable mappings + typographic scale (h1-h6 sizing, line-height, letter-spacing)
+- **Spacing/radius presets** — design token variables
+
+**Typography style example:**
+
+A typography preset maps semantic CSS variables (`--font-heading`, `--font-body`, `--font-mono`) to specific fonts and defines a typographic scale. It declares the fonts as `registryDependencies` — the installer resolves the dependency chain.
+
+```
+MAP SET app theme-token type registry:style name editorial
+    version 1.0.0 description "High-contrast editorial typography"
+    registryDependencies ["playfair-display","dm-sans","jetbrains-mono"]
+    categories ["serif","editorial","contrast"]
+```
+
+**Manifest content (the style's CSS configuration as JSON):**
+```json
+{
+  "cssVars": {
+    "theme": {
+      "--font-heading": "var(--font-playfair-display)",
+      "--font-body": "var(--font-dm-sans)",
+      "--font-mono": "var(--font-jetbrains-mono)"
+    }
+  },
+  "css": {
+    "@layer base": {
+      "h1": { "font-family": "var(--font-heading)", "font-size": "2.25rem", "line-height": "1.2", "letter-spacing": "-0.02em" },
+      "h2": { "font-family": "var(--font-heading)", "font-size": "1.875rem", "line-height": "1.3" },
+      "body, p": { "font-family": "var(--font-body)", "line-height": "1.65" },
+      "code, pre": { "font-family": "var(--font-mono)" }
+    }
+  }
+}
+```
+
+**Color style example:**
+```json
+{
+  "cssVars": {
+    "light": {
+      "--background": "oklch(0.98 0.01 240)",
+      "--foreground": "oklch(0.15 0.02 240)",
+      "--primary": "oklch(0.55 0.25 260)"
+    },
+    "dark": {
+      "--background": "oklch(0.15 0.02 240)",
+      "--foreground": "oklch(0.95 0.01 240)",
+      "--primary": "oklch(0.65 0.25 260)"
+    }
+  }
+}
+```
+
+Styles that reference no font files have no `registryDependencies` and are self-contained — just CSS variables inscribed as JSON.
+
+### registry:theme
+
+A complete visual package that bundles styles with actual asset files (fonts, patterns, wallpapers). The theme manifest references bundled assets via `_N` vout refs and may also declare `registryDependencies` for assets published separately.
+
+**Transaction structure (theme with bundled font and pattern):**
+```
+Output 0:  font file (font/woff2, 1 sat)
+Output 1:  pattern file (image/svg+xml, 1 sat)
+Output 2:  theme manifest (ord-fs/json, 1 sat, MAP + AIP)
+           { "font.woff2": "_0", "pattern.svg": "_1", "theme.json": "..." }
+```
+
+**Theme manifest content:**
+```json
+{
+  "font.woff2": "_0",
+  "pattern.svg": "_1",
+  "cssVars": {
+    "light": { "--background": "oklch(0.98 0.01 240)", "..." : "..." },
+    "dark": { "--background": "oklch(0.15 0.02 240)", "..." : "..." },
+    "theme": {
+      "--font-heading": "var(--font-space-grotesk)",
+      "--font-body": "var(--font-space-grotesk)",
+      "--radius": "0.5rem"
+    }
+  }
+}
+```
+
+The key distinction: a `registry:theme` bundles its assets as sibling inscription outputs. A `registry:style` references assets externally via `registryDependencies`. Both are valid — bundling guarantees availability (assets travel with the theme), while referencing enables reuse (multiple themes share the same font).
+
 ## Cross-Registry Publishing
 
 The registry package format is designed for cross-registry interoperability. Components from any shadcn-compatible registry can be published on-chain:
@@ -111,17 +239,19 @@ The registry package format is designed for cross-registry interoperability. Com
 | Source Registry | Type | Example |
 |----------------|------|---------|
 | BigBlocks | `registry:block`, `registry:ui` | Bitcoin wallet components, social feeds |
+| FontTrio | `registry:font`, `registry:style` | Font packages, curated typography presets |
 | theme-token | `registry:theme`, `registry:style` | Visual themes with bundled fonts/patterns |
 | ClawNet | `registry:skill`, `registry:agent` | AI agent skills and configurations |
 
-All registries share the same `registry:*` type system, `_N` relative vout references, and `ord-fs/json` manifest format. A BigBlocks component published on-chain is installable via any compatible gateway:
+All registries share the same `registry:*` type system, `_N` relative vout references, and `ord-fs/json` manifest format. A component published on-chain is installable via any compatible gateway:
 
 ```bash
 bunx shadcn@latest add https://clawnet.sh/r/blocks/bitcoin-avatar
 bunx shadcn@latest add https://bigblocks.dev/r/bitcoin-avatar.json
+bunx shadcn@latest add https://themetoken.dev/r/themes/{origin}
 ```
 
-Both serve the same shadcn-compatible JSON — one from on-chain data, one from the registry server.
+All serve the same shadcn-compatible JSON — from on-chain data or registry servers.
 
 ## Language Support
 
@@ -204,19 +334,91 @@ MAP SET app <registry> type registry:*
 
 This enables a decentralized ecosystem where multiple registries can coexist and cross-reference items.
 
-## JavaScript Example
+## JavaScript Examples
+
+### Skill Package
+
+```typescript
+import { buildPackageOutputs } from "@1sat/actions";
+
+const result = await buildPackageOutputs(
+  [
+    { path: "SKILL.md", content: skillBytes, contentType: "text/markdown" },
+    { path: "refs/api.md", content: apiBytes, contentType: "text/markdown" },
+  ],
+  {
+    app: "clawnet",
+    type: "registry:skill",
+    name: "humanize",
+    version: "1.0.0",
+    description: "Rewrites AI-generated text to sound natural",
+    author: "Satchmo",
+    categories: JSON.stringify(["writing", "style"]),
+  },
+  privateKey
+);
+// result.outputs — ready for createAction()
+// result.manifestVout — index of the manifest output
+```
+
+### Font Package
+
+```typescript
+const result = await buildPackageOutputs(
+  [
+    { path: "space-grotesk.woff2", content: fontBytes, contentType: "font/woff2" },
+  ],
+  {
+    app: "theme-token",
+    type: "registry:font",
+    name: "space-grotesk",
+    version: "1.0.0",
+    description: "Space Grotesk variable weight sans-serif",
+    "font.family": "Space Grotesk Variable",
+    "font.variable": "--font-space-grotesk",
+    "font.weight": JSON.stringify(["400", "500", "600", "700"]),
+    "font.subsets": JSON.stringify(["latin", "latin-ext"]),
+    categories: JSON.stringify(["sans-serif", "variable", "geometric"]),
+  },
+  privateKey
+);
+```
+
+### Theme with Bundled Assets
+
+```typescript
+const result = await buildPackageOutputs(
+  [
+    { path: "font.woff2", content: fontBytes, contentType: "font/woff2" },
+    { path: "pattern.svg", content: patternBytes, contentType: "image/svg+xml" },
+    { path: "theme.json", content: themeJsonBytes, contentType: "application/json" },
+  ],
+  {
+    app: "theme-token",
+    type: "registry:theme",
+    name: "midnight-editorial",
+    version: "1.0.0",
+    description: "Dark editorial theme with serif headings and geometric patterns",
+    categories: JSON.stringify(["dark", "editorial", "serif"]),
+  },
+  privateKey
+);
+```
+
+### Low-Level (without @1sat/actions)
 
 ```typescript
 import { Inscription, MAP, AIP, PrivateKeySigner, P2PKH } from "@1sat/templates";
 import { PrivateKey, Utils } from "@bsv/sdk";
 
-// Build file inscriptions
+const p2pkh = new P2PKH().lock(privateKey.toAddress());
+
+// File inscription outputs
 const files = [
   { path: "SKILL.md", content: skillMarkdown, contentType: "text/markdown" },
   { path: "example.md", content: exampleDocs, contentType: "text/markdown" },
 ];
 
-const p2pkh = new P2PKH().lock(privateKey.toAddress());
 const outputs = files.map(f => {
   const inscription = Inscription.create(
     new Uint8Array(Utils.toArray(f.content, "utf8")),
@@ -226,26 +428,18 @@ const outputs = files.map(f => {
   return { script: inscription.lock(), satoshis: 1 };
 });
 
-// Build ord-fs/json manifest
+// ord-fs/json manifest
 const manifest = {};
 files.forEach((f, i) => { manifest[f.path] = `_${i}`; });
 
-// MAP metadata
 const mapFields = {
   app: "clawnet",
-  type: "registry:block",
-  name: "bitcoin-avatar",
+  type: "registry:skill",
+  name: "humanize",
   version: "1.0.0",
-  description: "Bitcoin identity avatar with on-chain profile resolution",
-  title: "Bitcoin Avatar",
-  author: "Satchmo",
-  language: "en",
-  dependencies: JSON.stringify(["@radix-ui/react-avatar"]),
-  registryDependencies: JSON.stringify(["button"]),
-  categories: JSON.stringify(["identity", "social"]),
+  description: "Rewrites AI-generated text to sound natural",
 };
 
-// Create manifest inscription with MAP + AIP suffix
 const manifestInscription = Inscription.create(
   new Uint8Array(Utils.toArray(JSON.stringify(manifest), "utf8")),
   "ord-fs/json",
