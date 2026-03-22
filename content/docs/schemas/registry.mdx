@@ -160,7 +160,14 @@ MAP SET app theme-token type registry:style name editorial
     categories ["serif","editorial","contrast"]
 ```
 
-**Manifest content (the style's CSS configuration as JSON):**
+**Transaction structure:**
+```
+Output 0:  style.json (application/json, 1 sat) — the CSS configuration
+Output 1:  manifest (ord-fs/json, 1 sat, MAP + AIP)
+           { "style.json": "_0" }
+```
+
+**File content (`style.json` at output 0):**
 ```json
 {
   "cssVars": {
@@ -203,24 +210,32 @@ Styles that reference no font files have no `registryDependencies` and are self-
 
 ### registry:theme
 
-A complete visual package that bundles styles with actual asset files (fonts, patterns, wallpapers). The theme manifest references bundled assets via `_N` vout refs and may also declare `registryDependencies` for assets published separately.
+A complete visual package that bundles styles with actual asset files (fonts, patterns, wallpapers). The manifest is a pure `ord-fs/json` directory — only `string→string` file mappings. Style configuration lives in a separate `theme.json` file that the manifest points to.
 
 **Transaction structure (theme with bundled font and pattern):**
 ```
 Output 0:  font file (font/woff2, 1 sat)
 Output 1:  pattern file (image/svg+xml, 1 sat)
-Output 2:  theme manifest (ord-fs/json, 1 sat, MAP + AIP)
-           { "font.woff2": "_0", "pattern.svg": "_1", "theme.json": "..." }
+Output 2:  theme.json (application/json, 1 sat) — style definition
+Output 3:  manifest (ord-fs/json, 1 sat, MAP + AIP) — pure directory
+           { "font.woff2": "_0", "pattern.svg": "_1", "theme.json": "_2" }
 ```
 
-**Theme manifest content:**
+**Manifest content (pure directory — no inline config):**
 ```json
 {
   "font.woff2": "_0",
   "pattern.svg": "_1",
+  "theme.json": "_2"
+}
+```
+
+**theme.json content (at output 2):**
+```json
+{
   "cssVars": {
-    "light": { "--background": "oklch(0.98 0.01 240)", "..." : "..." },
-    "dark": { "--background": "oklch(0.15 0.02 240)", "..." : "..." },
+    "light": { "--background": "oklch(0.98 0.01 240)", "--foreground": "oklch(0.15 0.02 240)" },
+    "dark": { "--background": "oklch(0.15 0.02 240)", "--foreground": "oklch(0.95 0.01 240)" },
     "theme": {
       "--font-heading": "var(--font-space-grotesk)",
       "--font-body": "var(--font-space-grotesk)",
@@ -230,7 +245,9 @@ Output 2:  theme manifest (ord-fs/json, 1 sat, MAP + AIP)
 }
 ```
 
-The key distinction: a `registry:theme` bundles its assets as sibling inscription outputs. A `registry:style` references assets externally via `registryDependencies`. Both are valid — bundling guarantees availability (assets travel with the theme), while referencing enables reuse (multiple themes share the same font).
+The manifest is always a pure `ord-fs/json` directory — ORDFS needs clean `string→string` mappings to traverse. Style configuration, CSS variables, and any structured data live in separate files (like `theme.json`) that the manifest points to.
+
+The key distinction between types: a `registry:theme` bundles its assets as sibling inscription outputs (assets travel with the theme). A `registry:style` references assets externally via `registryDependencies` (enables reuse across themes). Both are valid approaches.
 
 ## Cross-Registry Publishing
 
