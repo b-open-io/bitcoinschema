@@ -135,7 +135,7 @@ screenshot_urls: [https://myapp.com/s1.png]
 MAP SET app clawnet type registry:app name my-app version 1.0.0 description "..." domain myapp.com icon https://...
 ```
 
-**Overlay interop:** The APP.md frontmatter maps directly to the `PublishedAppMetadata` interface from `metanet-apps`. Publishing via ClawNet also broadcasts a PushDrop token to `tm_apps` (protocol `[1, 'metanet apps']`) so the app appears in any wallet's app catalog.
+**Overlay discovery:** App tokens can be broadcast to the `tm_apps` overlay topic using the PushDrop protocol (`[1, 'metanet apps']`). The APP.md frontmatter maps directly to the `PublishedAppMetadata` interface, enabling cross-wallet app catalog discovery.
 
 **Publishing an app on-chain:**
 
@@ -148,7 +148,6 @@ const files = [
 ];
 
 const metadata = {
-  app: "clawnet",
   type: "registry:app",
   name: "my-app",
   version: "1.0.0",
@@ -164,9 +163,7 @@ const { outputs, manifestVout } = await buildPackageOutputs(
 // manifestVout — index of the manifest output
 ```
 
-**Dual-publish pattern:** Apps published via ClawNet CLI are automatically broadcast to both:
-1. The ClawNet registry (Convex-backed, with stars/downloads/attestations)
-2. The `tm_apps` overlay (PushDrop tokens, discoverable via `metanet-apps`)
+Any registry service can index `registry:app` inscriptions by querying for transactions matching `MAP SET type registry:app`. The overlay topic `tm_apps` provides an additional discovery channel for wallets and app catalogs.
 
 ## Design Asset Types
 
