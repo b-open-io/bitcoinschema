@@ -137,6 +137,37 @@ MAP SET app clawnet type registry:app name my-app version 1.0.0 description "...
 
 **Overlay interop:** The APP.md frontmatter maps directly to the `PublishedAppMetadata` interface from `metanet-apps`. Publishing via ClawNet also broadcasts a PushDrop token to `tm_apps` (protocol `[1, 'metanet apps']`) so the app appears in any wallet's app catalog.
 
+**Publishing an app on-chain:**
+
+```typescript
+import { buildPackageOutputs } from "@1sat/templates";
+
+const files = [
+  { path: "APP.md", content: appMdContent, contentType: "text/markdown" },
+  { path: "icon.png", content: iconBytes, contentType: "image/png" },
+];
+
+const metadata = {
+  app: "clawnet",
+  type: "registry:app",
+  name: "my-app",
+  version: "1.0.0",
+  description: "My web application",
+  domain: "myapp.com",
+  icon: "https://myapp.com/icon.png",
+};
+
+const { outputs, manifestVout } = await buildPackageOutputs(
+  files, metadata, signingKey
+);
+// outputs — ready for createAction()
+// manifestVout — index of the manifest output
+```
+
+**Dual-publish pattern:** Apps published via ClawNet CLI are automatically broadcast to both:
+1. The ClawNet registry (Convex-backed, with stars/downloads/attestations)
+2. The `tm_apps` overlay (PushDrop tokens, discoverable via `metanet-apps`)
+
 ## Design Asset Types
 
 Design assets form a composability stack: individual fonts are installable standalone, styles compose fonts into typography systems, and themes bundle everything into a complete visual package.
