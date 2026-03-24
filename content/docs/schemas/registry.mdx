@@ -103,7 +103,39 @@ All types use the `registry:` prefix for consistency across the shadcn ecosystem
 |------|-------------|
 | `registry:skill` | AI agent skills (SKILL.md + reference files) |
 | `registry:agent` | AI agent definitions (frontmatter + system prompt) |
+| `registry:app` | Full web applications published on-chain (APP.md + assets) |
 | `registry:organization` | Agent organizations (agent roster + skills) |
+
+### registry:app
+
+A full web application published on-chain via APP.md manifest. Interoperable with the `metanet-apps` package — apps broadcast to the `tm_apps` overlay topic are discoverable by any wallet.
+
+**APP.md frontmatter:**
+
+```yaml
+---
+name: my-app
+description: What the app does
+domain: myapp.com
+icon: https://myapp.com/icon.png
+version: 1.0.0
+httpURL: https://myapp.com
+category: DeFi
+tags: [trading, tokens]
+banner_image_url: https://myapp.com/banner.png
+screenshot_urls: [https://myapp.com/s1.png]
+---
+```
+
+**Required fields:** `name`, `description`, `domain`, `icon`, `version`
+
+**MAP metadata:**
+
+```
+MAP SET app clawnet type registry:app name my-app version 1.0.0 description "..." domain myapp.com icon https://...
+```
+
+**Overlay interop:** The APP.md frontmatter maps directly to the `PublishedAppMetadata` interface from `metanet-apps`. Publishing via ClawNet also broadcasts a PushDrop token to `tm_apps` (protocol `[1, 'metanet apps']`) so the app appears in any wallet's app catalog.
 
 ## Design Asset Types
 
